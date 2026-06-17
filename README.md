@@ -5,15 +5,16 @@ Dokumen ini disusun sebagai lembar jawaban dan panduan pengumpulan **Ujian Akhir
 ---
 
 ## 👥 Informasi Kelompok
-> [!IMPORTANT]
-> **Silakan lengkapi data anggota kelompok Anda di bawah ini sebelum mengumpulkan ke dosen!**
 
-* **Nama Aplikasi:** Roamie Rentcar
-* **Kelas:** [Isi Kelas Anda, Contoh: IF-4A / Reguler]
+* **Nama Aplikasi/Website:** Roamie Rentcar
+* **Kelas:** IF24B
+* **Program Studi :** Teknik Informatika
 * **Daftar Anggota:**
-  1. **[Nama Anggota 1]** - `[NIM Anggota 1]` (Peran: [Contoh: Backend Developer & DevOps])
-  2. **[Nama Anggota 2]** - `[NIM Anggota 2]` (Peran: [Contoh: Frontend Developer])
-  3. **[Nama Anggota 3]** - `[NIM Anggota 3]` (Peran: [Contoh: API Documentation & QA])
+  1. **[Gilang Ramadhan]** - `[24416255201003]` 
+  2. **[Kaisha Kamila Puspito]** - `[24416255201028]` 
+  3. **[Muhammad Ardha Abimanyu Nugroho]** - `[24416255201107]` 
+  4. **[Tasya Dwi Cahyani]** - `[24416255201252]` 
+  5. **[Sandy]** - `[24416255201014]` 
 
 ---
 
@@ -24,7 +25,7 @@ Layanan API dan web utama telah berhasil dideploy ke server production dengan ri
 * **Base URL Web:** [http://roamie.zytraxo.com](http://roamie.zytraxo.com)
 * **Base URL API:** [http://roamie.zytraxo.com/api](http://roamie.zytraxo.com/api)
 * **Link Repository (GitHub):** `[Isi Link Repository GitHub Anda]`
-* **Link API Specs (Apidog / Postman):** `[Isi Link Share Apidog / Postman Anda]`
+* **Link API Specs (Apidog):** `[382qz7nqsp.apidog.io]`
 
 ---
 
