@@ -1,4 +1,4 @@
-# 🚗 UAS Pengembangan API - Roamie Rentcar
+# 🚗 UAS API - Roamie Rentcar
 
 Dokumen ini disusun sebagai lembar jawaban dan panduan pengumpulan **Ujian Akhir Semester (UAS)** untuk mata kuliah Pengembangan API / Pemrograman Web. Proyek ini merupakan sistem backend & frontend rental mobil bernama **Roamie Rentcar** yang telah berhasil di-hosting dan diintegrasikan dengan berbagai layanan pihak ketiga.
 
