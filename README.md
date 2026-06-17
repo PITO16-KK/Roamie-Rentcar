@@ -24,8 +24,8 @@ Layanan API dan web utama telah berhasil dideploy ke server production dengan ri
 
 * **Base URL Web:** [http://roamie.zytraxo.com](http://roamie.zytraxo.com)
 * **Base URL API:** [http://roamie.zytraxo.com/api](http://roamie.zytraxo.com/api)
-* **Link Repository (GitHub):** `[Isi Link Repository GitHub Anda]`
-* **Link API Specs (Apidog):** `[382qz7nqsp.apidog.io]`
+* **Link Repository (GitHub):** `https://github.com/PITO16-KK/Roamie-Rentcar.git`
+* **Link API Specs (Apidog):** `382qz7nqsp.apidog.io`
 
 ---
 
