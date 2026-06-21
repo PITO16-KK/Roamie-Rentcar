@@ -90,7 +90,7 @@ Berikut adalah daftar endpoint API yang tersedia pada sistem **Roamie Rentcar**,
 
 ---
 
-## 🚀 Cara Pengujian Menggunakan Postman / Client API
+## 🚀 Cara Pengujian Menggunakan Postman / ApiDog
 1. Setel header `Accept: application/json` pada client API Anda.
 2. Lakukan request ke `POST /api/login` menggunakan kredensial di atas untuk mendapatkan token.
 3. Masukkan token tersebut pada tab **Authorization** -> **Bearer Token** pada request terproteksi lainnya.
