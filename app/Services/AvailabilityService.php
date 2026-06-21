@@ -23,7 +23,7 @@ class AvailabilityService
 
         // Fetch active rentals for the car
         $activeRentals = Rental::where('car_id', $carId)
-            ->whereIn('status', ['booked', 'on-going'])
+            ->whereIn('status', ['booked', 'on-going', 'approved'])
             ->get();
 
         foreach ($activeRentals as $rental) {

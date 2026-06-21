@@ -302,7 +302,7 @@ main {
         </a>
         <a href="{{ route('catalog.index') }}" class="btn btn-secondary">
           <i data-lucide="car" style="width:16px;height:16px;"></i>
-          Lihat Katalog
+          Lihat Promo
         </a>
       @elseif($status === 'pending')
         <a href="{{ route('profile') }}" class="btn btn-primary">
@@ -322,7 +322,7 @@ main {
         @endif
         <a href="{{ route('catalog.index') }}" class="btn btn-secondary">
           <i data-lucide="arrow-left" style="width:16px;height:16px;"></i>
-          Kembali ke Katalog
+          Kembali ke Promo
         </a>
       @endif
     </div>

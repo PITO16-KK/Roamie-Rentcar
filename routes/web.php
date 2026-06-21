@@ -132,3 +132,20 @@ Route::get('car-images/{path}', function ($path) {
 
     return $response;
 })->where('path', '.*');
+
+Route::get('avatars/{path}', function ($path) {
+    $path = str_replace(['../', '..\\'], '', $path); // Mencegah directory traversal
+    $fullPath = storage_path('app/public/avatars/' . $path);
+
+    if (!\Illuminate\Support\Facades\File::exists($fullPath)) {
+        abort(404);
+    }
+
+    $file = \Illuminate\Support\Facades\File::get($fullPath);
+    $type = \Illuminate\Support\Facades\File::mimeType($fullPath);
+
+    $response = \Illuminate\Support\Facades\Response::make($file, 200);
+    $response->header("Content-Type", $type);
+
+    return $response;
+})->where('path', '.*');

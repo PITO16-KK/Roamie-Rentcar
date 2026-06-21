@@ -9,68 +9,77 @@ use Illuminate\Http\Request;
 class ExportController extends Controller
 {
     /**
-     * Export all rentals to CSV
+     * Export all rentals to CSV (with preview screen support)
      */
-    public function exportRentals()
+    public function exportRentals(Request $request)
     {
         $rentals = Rental::with('car', 'user')->orderByDesc('created_at')->get();
 
-        $filename = 'data-rental-roamie-' . now()->format('Ymd-His') . '.csv';
+        if ($request->has('download')) {
+            $filename = 'data-rental-roamie-' . now()->format('Ymd-His') . '.csv';
 
-        $headers = [
-            'Content-Type'        => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
-            'Pragma'              => 'no-cache',
-            'Cache-Control'       => 'must-revalidate, post-check=0, pre-check=0',
-            'Expires'             => '0',
-        ];
+            $headers = [
+                'Content-Type'        => 'text/csv; charset=UTF-8',
+                'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+                'Pragma'              => 'no-cache',
+                'Cache-Control'       => 'must-revalidate, post-check=0, pre-check=0',
+                'Expires'             => '0',
+            ];
 
-        $callback = function () use ($rentals) {
-            $handle = fopen('php://output', 'w');
+            $callback = function () use ($rentals) {
+                $handle = fopen('php://output', 'w');
 
-            // BOM for UTF-8 Excel compatibility
-            fputs($handle, "\xEF\xBB\xBF");
+                // BOM for UTF-8 Excel compatibility
+                fputs($handle, "\xEF\xBB\xBF");
 
-            // Header Row
-            fputcsv($handle, [
-                'ID Rental',
-                'Nama Pelanggan',
-                'Email Pelanggan',
-                'Nama Mobil',
-                'Tipe Mobil',
-                'Harga/Hari (Rp)',
-                'Tanggal Mulai',
-                'Durasi (Hari)',
-                'Total Harga (Rp)',
-                'Status Sewa',
-                'Status Pembayaran',
-                'Metode Pembayaran',
-                'Tanggal Dibuat',
-            ]);
-
-            foreach ($rentals as $rental) {
-                $totalPrice = ($rental->car->rental_price ?? 0) * $rental->duration_days;
-
+                // Header Row
                 fputcsv($handle, [
-                    $rental->id,
-                    $rental->user->name ?? '-',
-                    $rental->user->email ?? '-',
-                    $rental->car->name ?? '-',
-                    $rental->car->type ?? '-',
-                    $rental->car->rental_price ?? 0,
-                    $rental->start_date,
-                    $rental->duration_days,
-                    $totalPrice,
-                    $rental->status,
-                    $rental->payment_status ?? 'unpaid',
-                    $rental->payment_method ?? '-',
-                    $rental->created_at->format('Y-m-d H:i:s'),
+                    'ID Rental',
+                    'Nama Pelanggan',
+                    'Email Pelanggan',
+                    'Nama Mobil',
+                    'Tipe Mobil',
+                    'Harga/Hari (Rp)',
+                    'Tanggal Mulai',
+                    'Durasi (Hari)',
+                    'Total Harga (Rp)',
+                    'Status Sewa',
+                    'Status Pembayaran',
+                    'Metode Pembayaran',
+                    'Tanggal Dibuat',
                 ]);
-            }
 
-            fclose($handle);
-        };
+                foreach ($rentals as $rental) {
+                    $totalPrice = ($rental->car->rental_price ?? 0) * $rental->duration_days;
 
-        return response()->stream($callback, 200, $headers);
+                    fputcsv($handle, [
+                        $rental->id,
+                        $rental->user->name ?? '-',
+                        $rental->user->email ?? '-',
+                        $rental->car->name ?? '-',
+                        $rental->car->type ?? '-',
+                        $rental->car->rental_price ?? 0,
+                        $rental->start_date,
+                        $rental->duration_days,
+                        $totalPrice,
+                        $rental->status,
+                        $rental->payment_status ?? 'unpaid',
+                        $rental->payment_method ?? '-',
+                        $rental->created_at->format('Y-m-d H:i:s'),
+                    ]);
+                }
+
+                fclose($handle);
+            };
+
+            return response()->stream($callback, 200, $headers);
+        }
+
+        // Show preview: display first 20 records
+        $totalCount = $rentals->count();
+        $previewRentals = $rentals->take(20);
+
+        return view('admin.export.preview', compact('previewRentals', 'totalCount'));
     }
 }
+

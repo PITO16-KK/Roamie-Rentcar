@@ -33,7 +33,7 @@ class PaymentController extends Controller
                 $rental = Rental::findOrFail($request->rental_id);
 
                 // Pastikan hanya customer pemilik rental yang mengunggah
-                if ($request->user()->id !== $rental->user_id) {
+                if ((int)$request->user()->id !== (int)$rental->user_id) {
                     return response()->json([
                         'status'  => 'error',
                         'message' => 'Anda tidak memiliki otorisasi untuk melakukan pembayaran sewa ini.'
@@ -107,7 +107,7 @@ class PaymentController extends Controller
         $rental = Rental::with(['car', 'user', 'payment'])->findOrFail($rentalId);
 
         // Pastikan hanya pemilik atau admin yang bisa mengakses
-        if ($request->user()->role !== 'admin' && $rental->user_id !== $request->user()->id) {
+        if ($request->user()->role !== 'admin' && (int)$rental->user_id !== (int)$request->user()->id) {
             return response()->json(['status' => 'error', 'message' => 'Akses ditolak.'], 403);
         }
 
@@ -207,7 +207,7 @@ class PaymentController extends Controller
             $user = $request->user();
 
             // Pastikan rental ini milik user yang sedang login
-            if ($rental->user_id !== $user->id) {
+            if ((int)$rental->user_id !== (int)$user->id) {
                 return response()->json([
                     'status'  => 'error',
                     'message' => 'Anda tidak memiliki otorisasi untuk mengakses pembayaran sewa ini.'

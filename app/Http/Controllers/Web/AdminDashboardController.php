@@ -7,6 +7,7 @@ use App\Models\Car;
 use App\Models\Rental;
 use App\Models\VehicleLocation;
 use App\Models\TripHistory;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class AdminDashboardController extends Controller
@@ -16,9 +17,19 @@ class AdminDashboardController extends Controller
      */
     public function index()
     {
+        // 1. Sync rental and vehicle statuses automatically
+        Rental::syncStatuses();
+
+        // 2. Fetch fresh statistics
         $totalCars = Car::count();
         $availableCars = Car::where('status', 'available')->count();
         $bookedCars = Car::where('status', 'booked')->count();
+        $rentedCars = Car::where('status', 'on-going')->count();
+
+        $totalUsers = User::count();
+        $totalTransactions = Rental::count();
+        $totalIncome = Rental::where('payment_status', 'paid')->sum('total_price');
+
         $activeRentals = Rental::whereIn('status', ['on-going', 'approved'])->count();
 
         // Statistics (based on start_date)
@@ -46,6 +57,10 @@ class AdminDashboardController extends Controller
             'totalCars',
             'availableCars',
             'bookedCars',
+            'rentedCars',
+            'totalUsers',
+            'totalTransactions',
+            'totalIncome',
             'activeRentals',
             'locations',
             'histories',

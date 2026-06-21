@@ -113,11 +113,11 @@ class AuthController extends Controller
                 $data = substr($avatarData, strpos($avatarData, ',') + 1);
                 $type = strtolower($type[1]);
 
-                if (in_array($type, ['jpg', 'jpeg', 'png', 'gif'])) {
+                if (in_array($type, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'heif', 'bmp'])) {
                     $data = base64_decode($data);
                     if ($data !== false) {
                         $fileName = 'avatar_' . $user->id . '_' . time() . '.' . $type;
-                        $directory = public_path('avatars');
+                        $directory = storage_path('app/public/avatars');
                         if (!file_exists($directory)) {
                             mkdir($directory, 0755, true);
                         }
@@ -149,15 +149,15 @@ class AuthController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
         }
 
-        $request->validate([
-            'avatar' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
-
+        // 1. Handle uploaded file (multipart/form-data)
         if ($request->hasFile('avatar')) {
+            $request->validate([
+                'avatar' => 'required|image|mimes:jpeg,png,jpg,gif,webp,heic,heif,bmp|max:2048',
+            ]);
             $file = $request->file('avatar');
             $fileName = 'avatar_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
             
-            $directory = public_path('avatars');
+            $directory = storage_path('app/public/avatars');
             if (!file_exists($directory)) {
                 mkdir($directory, 0755, true);
             }
@@ -175,9 +175,42 @@ class AuthController extends Controller
             ]);
         }
 
+        // 2. Handle base64 payload (JSON or input parameter)
+        $avatarData = $request->avatar ?? $request->input('avatar');
+        if ($avatarData && is_string($avatarData)) {
+            // Handle base64 string
+            if (preg_match('/^data:image\/(\w+);base64,/', $avatarData, $type)) {
+                $data = substr($avatarData, strpos($avatarData, ',') + 1);
+                $type = strtolower($type[1]);
+
+                if (in_array($type, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'heif', 'bmp'])) {
+                    $data = base64_decode($data);
+                    if ($data !== false) {
+                        $fileName = 'avatar_' . $user->id . '_' . time() . '.' . $type;
+                        $directory = storage_path('app/public/avatars');
+                        if (!file_exists($directory)) {
+                            mkdir($directory, 0755, true);
+                        }
+                        file_put_contents($directory . '/' . $fileName, $data);
+                        $user->avatar = url('avatars/' . $fileName);
+                        $user->save();
+
+                        return response()->json([
+                            'status' => 'success',
+                            'message' => 'Avatar uploaded successfully',
+                            'data' => [
+                                'user' => $user
+                            ]
+                        ]);
+                    }
+                }
+                return response()->json(['status' => 'error', 'message' => 'Invalid image format'], 400);
+            }
+        }
+
         return response()->json([
             'status' => 'error',
-            'message' => 'No image file uploaded'
+            'message' => 'No avatar data or file uploaded'
         ], 400);
     }
 }

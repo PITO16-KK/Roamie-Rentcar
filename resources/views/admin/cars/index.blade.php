@@ -98,6 +98,7 @@
             <tr>
                 <th>ID</th>
                 <th>Nama Mobil</th>
+                <th>Plat Nomor</th>
                 <th>Tipe</th>
                 <th>Harga Sewa / Hari</th>
                 <th>Status</th>
@@ -109,6 +110,11 @@
                 <tr>
                     <td>#{{ $car->id }}</td>
                     <td style="font-weight: 600;">{{ $car->name }}</td>
+                    <td>
+                        <code style="font-family: monospace; font-weight: 700; background: rgba(255, 255, 255, 0.05); padding: 0.25rem 0.6rem; border-radius: 0.35rem; border: 1px solid rgba(255, 255, 255, 0.05); font-size: 0.85rem; color: var(--accent);">
+                            {{ $car->plate_number ?? '-' }}
+                        </code>
+                    </td>
                     <td>{{ $car->type }}</td>
                     <td>Rp {{ number_format($car->rental_price, 0, ',', '.') }}</td>
                     <td>
@@ -133,7 +139,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6" style="text-align: center; color: var(--text-secondary); padding: 2rem;">
+                    <td colspan="7" style="text-align: center; color: var(--text-secondary); padding: 2rem;">
                         Belum ada mobil yang terdaftar.
                     </td>
                 </tr>

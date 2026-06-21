@@ -239,6 +239,42 @@
         <span class="metric-value">{{ $bookedCars }}</span>
         <span style="color: var(--warning); font-size: 0.8rem; font-weight: 600;">Menunggu jadwal</span>
     </div>
+
+    <div class="card metric-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span class="metric-label">Sedang Disewa</span>
+            <i data-lucide="key" style="color: var(--accent); width: 18px; height: 18px;"></i>
+        </div>
+        <span class="metric-value">{{ $rentedCars }}</span>
+        <span style="color: var(--accent); font-size: 0.8rem; font-weight: 600;">Sedang digunakan</span>
+    </div>
+    
+    <div class="card metric-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span class="metric-label">Total User</span>
+            <i data-lucide="users" style="color: var(--text-secondary); width: 18px; height: 18px;"></i>
+        </div>
+        <span class="metric-value">{{ $totalUsers }}</span>
+        <span style="color: var(--text-secondary); font-size: 0.8rem; font-weight: 600;">Akun terdaftar</span>
+    </div>
+
+    <div class="card metric-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span class="metric-label">Total Transaksi</span>
+            <i data-lucide="receipt" style="color: var(--warning); width: 18px; height: 18px;"></i>
+        </div>
+        <span class="metric-value">{{ $totalTransactions }}</span>
+        <span style="color: var(--warning); font-size: 0.8rem; font-weight: 600;">Sewa terdaftar</span>
+    </div>
+
+    <div class="card metric-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span class="metric-label">Pendapatan</span>
+            <i data-lucide="banknote" style="color: var(--success); width: 18px; height: 18px;"></i>
+        </div>
+        <span class="metric-value" style="font-size: 1.8rem; line-height: 2.2rem; margin: 0.5rem 0;">Rp{{ number_format($totalIncome, 0, ',', '.') }}</span>
+        <span style="color: var(--success); font-size: 0.8rem; font-weight: 600;">Pembayaran lunas</span>
+    </div>
     
     <div class="card metric-card">
         <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -321,7 +357,12 @@
         <tbody>
             @forelse($activeRentalsList as $rental)
                 <tr>
-                    <td style="font-weight:600;">{{ $rental->car->name }}</td>
+                    <td style="font-weight:600;">
+                        {{ $rental->car->name }}
+                        <div style="font-size:0.75rem; color:var(--text-secondary); font-family:monospace; margin-top:0.2rem; font-weight:700;">
+                            [{{ $rental->car->plate_number ?? '-' }}]
+                        </div>
+                    </td>
                     <td style="color:var(--text-secondary);">{{ $rental->user->name }}</td>
                     <td style="color:var(--text-secondary);">{{ $rental->start_date }}</td>
                     <td style="color:var(--text-secondary);">{{ $rental->duration_days }} Hari</td>
@@ -334,7 +375,7 @@
                         @endif
                     </td>
                     <td style="color:var(--text-secondary);font-size:.82rem;">{{ strtoupper($rental->payment_method ?? '-') }}</td>
-                    <td style="font-weight:700;">{{ number_format(($rental->car->rental_price ?? 0) * $rental->duration_days, 0, ',', '.') }}</td>
+                    <td style="font-weight:700;">{{ number_format($rental->total_price, 0, ',', '.') }}</td>
                     <td><button class="btn-sm" onclick="focusCar({{ $rental->car_id }})">Fokus Peta</button></td>
                 </tr>
             @empty
@@ -359,16 +400,113 @@
     var histories     = @json($histories);
     var markers = {}, bounds = [];
 
-    var pulseIcon = L.divIcon({ className:'custom-div-icon', html:"<div class='pulse-marker'></div>", iconSize:[12,12], iconAnchor:[6,6] });
+    var carMarkerIcon = L.divIcon({
+        className: 'custom-div-icon',
+        html: `<div style="
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-radius: 50%;
+            border: 2px solid #fff;
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            position: relative;
+        ">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/>
+                <circle cx="7" cy="17" r="2"/>
+                <path d="M9 17h6"/>
+                <circle cx="17" cy="17" r="2"/>
+            </svg>
+            <div style="
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                border-radius: 50%;
+                border: 2px solid #6366f1;
+                animation: marker-pulse 2s infinite;
+                top: -2px;
+                left: -2px;
+                box-sizing: content-box;
+            "></div>
+        </div>`,
+        iconSize: [38, 38],
+        iconAnchor: [19, 19],
+        popupAnchor: [0, -20]
+    });
+
     var deviceIcon = L.divIcon({ className:'custom-div-icon', html:"<div style='width:16px;height:16px;background:#10b981;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 4px rgba(16,185,129,.3);'></div>", iconSize:[16,16], iconAnchor:[8,8] });
+
+    function createPopupHtml(rental) {
+        var car = rental.car;
+        var user = rental.user;
+        var formattedPrice = new Intl.NumberFormat('id-ID').format(car.rental_price);
+        
+        var imageUrl = car.image ? car.image : 'https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?auto=format&fit=crop&q=80&w=200';
+        if (car.image && !car.image.startsWith('http')) {
+            imageUrl = '/car-images/' + car.image;
+        }
+
+        // Clean and format phone number for WhatsApp
+        var rawPhone = user.phone ? user.phone.toString() : '';
+        var cleanPhone = rawPhone.replace(/[^0-9]/g, '');
+        var waPhone = cleanPhone;
+        if (cleanPhone.startsWith('0')) {
+            waPhone = '62' + cleanPhone.substring(1);
+        } else if (cleanPhone.startsWith('8')) {
+            waPhone = '62' + cleanPhone;
+        }
+
+        return `
+            <div style="font-family: 'Inter', sans-serif; color: #1e293b; min-width: 280px; padding: 4px;">
+                <!-- Header -->
+                <div style="display: flex; gap: 12px; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 10px;">
+                    <img src="${imageUrl}" style="width: 75px; height: 50px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1;" />
+                    <div>
+                        <h3 style="margin: 0; font-size: 15px; font-weight: 800; color: #0f172a; line-height: 1.2;">${car.name}</h3>
+                        <span style="font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: 700;">${car.type} (${car.year || '-'})</span>
+                        <div style="display: inline-block; margin-top: 4px; font-family: monospace; font-size: 11px; font-weight: 800; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 6px; color: #334155;">
+                            ${car.plate_number || '-'}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Car Specifications -->
+                <div style="margin-bottom: 12px;">
+                    <span style="font-size: 9px; color: #94a3b8; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px;">Spesifikasi Unit:</span>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11px;">
+                        <div>⚙️ <b>Trans:</b> ${car.gearbox || '-'}</div>
+                        <div>⛽ <b>Mesin:</b> ${car.engine || '-'}</div>
+                        <div>👥 <b>Kursi:</b> ${car.seats || '-'} Seat</div>
+                        <div>💰 <b>Sewa:</b> Rp${formattedPrice}/Hari</div>
+                    </div>
+                </div>
+                
+                <!-- User Data -->
+                <div style="background: #f8fafc; border-radius: 8px; padding: 8px 10px; border: 1px solid #e2e8f0;">
+                    <span style="font-size: 9px; color: #94a3b8; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px;">Penyewa & Kontak:</span>
+                    <div style="font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 2px;">👤 ${user.name}</div>
+                    <div style="font-size: 11px; color: #64748b; margin-bottom: 6px;">✉️ ${user.email}</div>
+                    <div style="margin-top: 8px;">
+                        <a href="https://wa.me/${waPhone}" target="_blank" style="display: block; text-align: center; background: #22c55e; color: #fff; padding: 8px 10px; border-radius: 6px; text-decoration: none; font-size: 11px; font-weight: 800; box-shadow: 0 2px 4px rgba(34, 197, 94, 0.2); transition: background 0.2s;">
+                            💬 Hubungi via WhatsApp (${rawPhone || '-'})
+                        </a>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
 
     // Plot static locations
     activeRentals.forEach(function(rental) {
         var loc = locations.find(l => l.car_id === rental.car_id);
         if (loc && loc.latitude) {
-            var m = L.marker([loc.latitude, loc.longitude], {icon: pulseIcon})
+            var m = L.marker([loc.latitude, loc.longitude], {icon: carMarkerIcon})
                 .addTo(map)
-                .bindPopup("<div style='color:#000'><b>" + rental.car.name + "</b><br>Penyewa: " + rental.user.name + "</div>");
+                .bindPopup(createPopupHtml(rental));
             markers[rental.car_id] = m;
             bounds.push([loc.latitude, loc.longitude]);
         }
@@ -442,7 +580,17 @@
                 });
 
                 // Update static marker on map too
-                if (markers[simCarId]) markers[simCarId].setLatLng([lat, lng]);
+                if (markers[simCarId]) {
+                    markers[simCarId].setLatLng([lat, lng]);
+                } else {
+                    var rental = activeRentals.find(r => r.car_id === simCarId);
+                    if (rental) {
+                        var m = L.marker([lat, lng], {icon: carMarkerIcon})
+                            .addTo(map)
+                            .bindPopup(createPopupHtml(rental));
+                        markers[simCarId] = m;
+                    }
+                }
 
             }, function(err) {
                 Swal.fire({ title:'Error GPS', text: err.message, icon:'error', background:'#1e293b', color:'#fff' });
@@ -470,7 +618,18 @@
             .then(r => r.json())
             .then(data => {
                 data.forEach(function(loc) {
-                    if (markers[loc.car_id]) markers[loc.car_id].setLatLng([loc.latitude, loc.longitude]);
+                    if (markers[loc.car_id]) {
+                        markers[loc.car_id].setLatLng([loc.latitude, loc.longitude]);
+                    } else {
+                        // Plot dynamically if it wasn't on the map initially (user just activated GPS)
+                        var rental = activeRentals.find(r => r.car_id === loc.car_id);
+                        if (rental) {
+                            var m = L.marker([loc.latitude, loc.longitude], {icon: carMarkerIcon})
+                                .addTo(map)
+                                .bindPopup(createPopupHtml(rental));
+                            markers[loc.car_id] = m;
+                        }
+                    }
                 });
             }).catch(() => {});
     }, 5000);

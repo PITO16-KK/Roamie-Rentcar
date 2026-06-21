@@ -230,7 +230,7 @@
                 </a>
             </li>
             <li>
-                <a href="{{ route('admin.export.rentals') }}" target="_blank">
+                <a href="{{ route('admin.export.rentals') }}">
                     <i data-lucide="download"></i>
                     <span>Ekspor CSV</span>
                 </a>

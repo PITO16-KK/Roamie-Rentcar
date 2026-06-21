@@ -358,7 +358,7 @@
 <nav class="navbar">
     <a href="{{ route('landing') }}" class="logo">ROAMIE</a>
     <div class="nav-actions">
-        <a href="{{ route('catalog.index') }}" class="nav-link">Katalog</a>
+        <a href="{{ route('catalog.index') }}" class="nav-link">Promo</a>
         <a href="{{ route('logout') }}" class="btn-logout">
             <i data-lucide="log-out"></i> Keluar
         </a>
@@ -382,7 +382,13 @@
         <!-- Left: Profile Card -->
         <div>
             <div class="card" style="text-align:center;">
-                <div class="avatar-ring">{{ strtoupper(substr($user->name, 0, 1)) }}</div>
+                <div class="avatar-ring" style="overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                    @if($user->avatar)
+                        <img src="{{ $user->avatar }}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;">
+                    @else
+                        {{ strtoupper(substr($user->name, 0, 1)) }}
+                    @endif
+                </div>
                 <div class="profile-name">{{ $user->name }}</div>
                 <div class="profile-email">{{ $user->email }}</div>
                 <div style="display:flex;justify-content:center;">
@@ -432,8 +438,12 @@
 
                 <hr class="profile-divider">
 
-                <form action="{{ route('profile.update') }}" method="POST" class="edit-form" style="text-align:left;">
+                <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" class="edit-form" style="text-align:left;">
                     @csrf
+                    <div>
+                        <label class="form-label">Foto Profil</label>
+                        <input type="file" name="avatar" class="form-input" accept="image/*">
+                    </div>
                     <div>
                         <label class="form-label">Ubah Nama</label>
                         <input type="text" name="name" class="form-input" value="{{ old('name', $user->name) }}" required>
@@ -469,7 +479,9 @@
                     <div class="rental-card-header">
                         <div>
                             <div class="rental-car-name">{{ $rental->car->name ?? 'N/A' }}</div>
-                            <div class="rental-car-type">{{ $rental->car->type ?? '' }}</div>
+                            <div class="rental-car-type">
+                                {{ $rental->car->type ?? '' }} &bull; Plat: <span style="font-family: monospace; font-weight: 700; color: var(--accent);">{{ $rental->car->plate_number ?? '-' }}</span>
+                            </div>
                         </div>
                         <div style="display:flex;flex-direction:column;gap:.4rem;align-items:flex-end;">
                             <span class="badge badge-{{ $rental->status === 'on-going' ? 'ongoing' : ($rental->status === 'completed' ? 'completed' : 'booked') }}">
@@ -542,10 +554,10 @@
                 <div class="card empty-state">
                     <i data-lucide="car"></i>
                     <h3 style="margin-bottom:.5rem;">Belum ada pemesanan</h3>
-                    <p style="font-size:.9rem;">Temukan mobil impian Anda di katalog kami.</p>
+                    <p style="font-size:.9rem;">Temukan berbagai penawaran sewa menarik di halaman promo kami.</p>
                     <a href="{{ route('catalog.index') }}" class="btn-pay" style="margin-top:1.25rem;display:inline-flex;">
                         <i data-lucide="search" style="width:14px;height:14px;"></i>
-                        Jelajahi Katalog
+                        Jelajahi Promo
                     </a>
                 </div>
             @endforelse
@@ -772,11 +784,22 @@ function toggleGpsTracking(checkbox) {
             },
             function(error) {
                 console.warn('Initial GPS query failed, fallback to watch:', error);
+                if (error.code === 1) { // Permission Denied
+                    Swal.fire({
+                        title: 'Izin GPS Ditolak',
+                        text: 'Silakan aktifkan izin lokasi di browser Anda untuk menggunakan fitur ini.',
+                        icon: 'warning',
+                        background: '#1e293b',
+                        color: '#fff'
+                    });
+                    checkbox.checked = false;
+                    coordsDisplay.style.display = 'none';
+                }
             },
             {
                 enableHighAccuracy: false,
-                maximumAge: 30000,
-                timeout: 5000
+                maximumAge: 10000,
+                timeout: 20000 // Increased to 20s
             }
         );
         
@@ -787,12 +810,31 @@ function toggleGpsTracking(checkbox) {
             },
             function(error) {
                 console.error('GPS watch error:', error);
-                coordsDisplay.innerHTML = '<span style="color:var(--danger)">⚠️ Gagal mengambil GPS: ' + error.message + '</span>';
+                if (error.code === 1) { // Permission Denied
+                    Swal.fire({
+                        title: 'Izin GPS Ditolak',
+                        text: 'Silakan aktifkan izin lokasi di browser Anda untuk menggunakan fitur ini.',
+                        icon: 'warning',
+                        background: '#1e293b',
+                        color: '#fff'
+                    });
+                    checkbox.checked = false;
+                    coordsDisplay.style.display = 'none';
+                    if (gpsWatchers[carId]) {
+                        navigator.geolocation.clearWatch(gpsWatchers[carId]);
+                        delete gpsWatchers[carId];
+                    }
+                } else if (error.code === 3) {
+                    // Timeout - ignore to keep UI clean and active
+                    console.warn('GPS watch timeout. Retrying in background...');
+                } else {
+                    coordsDisplay.innerHTML = '<span style="color:var(--danger)">⚠️ Gagal mengambil GPS: ' + error.message + '</span>';
+                }
             },
             {
                 enableHighAccuracy: false,
-                maximumAge: 30000,
-                timeout: 15000
+                maximumAge: 10000,
+                timeout: 30000 // Increased to 30s
             }
         );
     } else {

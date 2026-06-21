@@ -31,9 +31,16 @@ class CarController extends Controller
      */
     public function store(Request $request)
     {
+        if ($request->has('plate_number')) {
+            $request->merge([
+                'plate_number' => strtoupper(trim($request->plate_number))
+            ]);
+        }
+
         $request->validate([
             'name'         => 'required|string|max:255',
             'type'         => 'required|string|max:255',
+            'plate_number' => ['required', 'string', 'unique:cars,plate_number', 'regex:/^[A-Z]{1,2}\s?\d{1,4}\s?[A-Z]{1,3}$/i'],
             'rental_price' => 'required|numeric|min:0',
             'status'       => 'required|in:available,booked,on-going',
             'image'        => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
@@ -42,12 +49,17 @@ class CarController extends Controller
             'seats'        => 'nullable|integer|min:1',
             'engine'       => 'nullable|string|max:100',
             'year'         => 'nullable|integer|min:1900|max:' . date('Y'),
+        ], [
+            'plate_number.regex' => 'Format plat nomor tidak valid. Standar Indonesia: B 1234 ABC atau D 999 XY.',
+            'plate_number.unique' => 'Plat nomor ini sudah terdaftar pada mobil lain.',
         ]);
 
         $data = $request->only([
-            'name', 'type', 'rental_price', 'status',
+            'name', 'type', 'plate_number', 'rental_price', 'status',
             'description', 'gearbox', 'seats', 'engine', 'year',
         ]);
+
+        $data['plate_number'] = strtoupper(trim($data['plate_number']));
 
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('cars', 'public');
@@ -74,9 +86,16 @@ class CarController extends Controller
     {
         $car = Car::findOrFail($id);
 
+        if ($request->has('plate_number')) {
+            $request->merge([
+                'plate_number' => strtoupper(trim($request->plate_number))
+            ]);
+        }
+
         $request->validate([
             'name'         => 'required|string|max:255',
             'type'         => 'required|string|max:255',
+            'plate_number' => ['required', 'string', 'unique:cars,plate_number,' . $id, 'regex:/^[A-Z]{1,2}\s?\d{1,4}\s?[A-Z]{1,3}$/i'],
             'rental_price' => 'required|numeric|min:0',
             'status'       => 'required|in:available,booked,on-going',
             'image'        => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
@@ -85,12 +104,17 @@ class CarController extends Controller
             'seats'        => 'nullable|integer|min:1',
             'engine'       => 'nullable|string|max:100',
             'year'         => 'nullable|integer|min:1900|max:' . date('Y'),
+        ], [
+            'plate_number.regex' => 'Format plat nomor tidak valid. Standar Indonesia: B 1234 ABC atau D 999 XY.',
+            'plate_number.unique' => 'Plat nomor ini sudah terdaftar pada mobil lain.',
         ]);
 
         $data = $request->only([
-            'name', 'type', 'rental_price', 'status',
+            'name', 'type', 'plate_number', 'rental_price', 'status',
             'description', 'gearbox', 'seats', 'engine', 'year',
         ]);
+
+        $data['plate_number'] = strtoupper(trim($data['plate_number']));
 
         if ($request->hasFile('image')) {
             // Hapus gambar lama jika ada

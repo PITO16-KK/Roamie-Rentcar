@@ -34,12 +34,13 @@
         body {
             background-color: var(--bg-primary);
             color: var(--text-primary);
-            overflow: hidden;
+            overflow-y: auto;
             background-image: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.1), transparent 50%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 2rem 1rem;
         }
 
         .login-card {

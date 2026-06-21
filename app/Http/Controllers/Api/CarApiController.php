@@ -13,12 +13,12 @@ class CarApiController extends Controller
      */
     public function index(Request $request)
     {
-        $status = $request->query('status');
+        $status = $request->query('status', 'available');
 
-        if ($status) {
-            $cars = Car::where('status', $status)->get();
-        } else {
+        if ($status === 'all') {
             $cars = Car::all();
+        } else {
+            $cars = Car::where('status', $status)->get();
         }
 
         $cars = $cars->map(function ($car) {

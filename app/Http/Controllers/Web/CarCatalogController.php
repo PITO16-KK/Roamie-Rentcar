@@ -9,27 +9,24 @@ use Illuminate\Http\Request;
 class CarCatalogController extends Controller
 {
     /**
-     * Display the public car catalog.
+     * Display the public promo page.
      */
     public function index(Request $request)
     {
-        $query = Car::query();
+        $query = Car::where('status', 'available');
 
-        // Handle Search
-        if ($request->has('search') && $request->search != '') {
+        // Filter pencarian berdasarkan nama mobil
+        if ($request->filled('search')) {
             $query->where('name', 'like', '%' . $request->search . '%');
         }
 
-        // Handle Type Filter
-        if ($request->has('type') && $request->type != '') {
+        // Filter berdasarkan tipe mobil
+        if ($request->filled('type') && $request->type !== 'all') {
             $query->where('type', $request->type);
         }
 
         $cars = $query->get();
-        
-        // Get unique types for filter
-        $types = Car::distinct()->pluck('type');
 
-        return view('catalog', compact('cars', 'types'));
+        return view('catalog', compact('cars'));
     }
 }

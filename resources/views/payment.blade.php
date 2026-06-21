@@ -412,7 +412,11 @@ body{background:var(--bg);color:var(--text);min-height:100vh;background-image:ra
       <div class="card" style="margin-top:1rem;">
         <div class="section-label">Penyewa</div>
         <div style="display:flex;align-items:center;gap:.75rem;">
-          <div style="width:36px;height:36px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.9rem;color:#fff;flex-shrink:0;">{{ strtoupper(substr($rental->user->name,0,1)) }}</div>
+          @if($rental->user->avatar)
+            <img src="{{ $rental->user->avatar }}" alt="Avatar" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;">
+          @else
+            <div style="width:36px;height:36px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.9rem;color:#fff;flex-shrink:0;">{{ strtoupper(substr($rental->user->name,0,1)) }}</div>
+          @endif
           <div>
             <div style="font-weight:600;font-size:.9rem;">{{ $rental->user->name }}</div>
             <div style="color:var(--muted);font-size:.78rem;">{{ $rental->user->email }}</div>

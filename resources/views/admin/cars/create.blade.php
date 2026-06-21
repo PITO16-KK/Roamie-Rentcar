@@ -127,19 +127,25 @@
 
         <div class="form-grid">
             <div class="form-group">
+                <label for="plate_number">Plat Nomor Kendaraan *</label>
+                <input type="text" id="plate_number" name="plate_number" class="form-control" style="text-transform: uppercase;" placeholder="Contoh: B 1234 ABC" value="{{ old('plate_number') }}" required>
+                @error('plate_number') <div class="error-text">{{ $message }}</div> @enderror
+            </div>
+            <div class="form-group">
                 <label for="rental_price">Harga Sewa Per Hari (Rp) *</label>
                 <input type="number" id="rental_price" name="rental_price" class="form-control" placeholder="Contoh: 350000" value="{{ old('rental_price') }}" required>
                 @error('rental_price') <div class="error-text">{{ $message }}</div> @enderror
             </div>
-            <div class="form-group">
-                <label for="status">Status Awal *</label>
-                <select id="status" name="status" class="form-control" required>
-                    <option value="available" {{ old('status') == 'available' ? 'selected' : '' }}>Tersedia</option>
-                    <option value="booked" {{ old('status') == 'booked' ? 'selected' : '' }}>Di-Booking</option>
-                    <option value="on-going" {{ old('status') == 'on-going' ? 'selected' : '' }}>Sedang Disewa</option>
-                </select>
-                @error('status') <div class="error-text">{{ $message }}</div> @enderror
-            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="status">Status Awal *</label>
+            <select id="status" name="status" class="form-control" required>
+                <option value="available" {{ old('status') == 'available' ? 'selected' : '' }}>Tersedia</option>
+                <option value="booked" {{ old('status') == 'booked' ? 'selected' : '' }}>Di-Booking</option>
+                <option value="on-going" {{ old('status') == 'on-going' ? 'selected' : '' }}>Sedang Disewa</option>
+            </select>
+            @error('status') <div class="error-text">{{ $message }}</div> @enderror
         </div>
 
         <p class="section-label">Spesifikasi Kendaraan</p>

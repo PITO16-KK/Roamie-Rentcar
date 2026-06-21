@@ -352,7 +352,7 @@ body {
                 <tr>
                     <td>
                         <strong>{{ $rental->car->name }}</strong><br>
-                        <span style="font-size: 0.78rem; color: var(--text-muted);">Tipe: {{ $rental->car->type }}</span>
+                        <span style="font-size: 0.78rem; color: var(--text-muted);">Tipe: {{ $rental->car->type }} &bull; Plat: {{ $rental->car->plate_number ?? '-' }}</span>
                     </td>
                     <td>
                         {{ \Carbon\Carbon::parse($rental->start_date)->format('d M Y') }} - 

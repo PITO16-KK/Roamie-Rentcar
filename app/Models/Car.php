@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['name', 'type', 'rental_price', 'status', 'image', 'description', 'gearbox', 'seats', 'engine', 'year'])]
+#[Fillable(['name', 'type', 'plate_number', 'rental_price', 'status', 'image', 'description', 'gearbox', 'seats', 'engine', 'year'])]
 class Car extends Model
 {
     /** @use HasFactory<\Database\Factories\CarFactory> */

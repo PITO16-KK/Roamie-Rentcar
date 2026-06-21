@@ -26,13 +26,31 @@ class ProfileController extends Controller
             'name' => 'required|string|max:255',
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:500',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,heic,heif,bmp|max:2048',
         ]);
 
-        Auth::user()->update([
+        $user = Auth::user();
+
+        $data = [
             'name' => $request->name,
             'phone' => $request->phone,
             'address' => $request->address,
-        ]);
+        ];
+
+        if ($request->hasFile('avatar')) {
+            $file = $request->file('avatar');
+            $fileName = 'avatar_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+            
+            $directory = storage_path('app/public/avatars');
+            if (!file_exists($directory)) {
+                mkdir($directory, 0755, true);
+            }
+            $file->move($directory, $fileName);
+            
+            $data['avatar'] = url('avatars/' . $fileName);
+        }
+
+        $user->update($data);
 
         return back()->with('success', 'Profil berhasil diperbarui!');
     }

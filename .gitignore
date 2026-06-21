@@ -32,3 +32,7 @@ Thumbs.db
 zytraxoc_rental_mobil
 *.md
 !README.md
+
+/public/error_log
+/roamie_rentals_export.xls
+/tmp_landing.html
